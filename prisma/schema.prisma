@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  messages   Message[]
+  threadRead ThreadRead[]
+}
+
+model Thread {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages   Message[]
+  threadRead ThreadRead[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  thread   Thread @relation(fields: [threadId], references: [id])
+  threadId String
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+}
+
+model ThreadRead {
+  id     String   @id @default(cuid())
+  readAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  thread   Thread @relation(fields: [threadId], references: [id])
+  threadId String
+
+  @@unique([userId, threadId])
+}
