@@ -1,5 +1,8 @@
 FROM node:22-alpine AS base
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
 # Install dependencies
 FROM base AS deps
 WORKDIR /app
@@ -33,6 +36,9 @@ COPY --from=builder /app/package.json ./package.json
 # Install runtime tools needed by start.sh (prisma migrate + tsx for seeding)
 RUN npm install --no-save prisma@5 tsx@4 bcryptjs @prisma/client@5
 RUN npx prisma generate
+
+# Give nextjs user ownership of the app directory
+RUN chown -R nextjs:nodejs /app
 
 COPY start.sh ./start.sh
 RUN chmod +x start.sh
